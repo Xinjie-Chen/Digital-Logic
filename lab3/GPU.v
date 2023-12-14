@@ -11,7 +11,6 @@ module GPU(
     reg [39:0]msgArray;
     initial msgArray = 40'hbbbbbbbbbb;
     assign dataBus = msgArray[39:8];
-    //parameter NUMBER = 40'ha202242154;
     always @(posedge clk3hz or negedge clr) begin
         if (state == 0) begin
             if(!clr)
