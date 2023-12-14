@@ -66,6 +66,7 @@ module top(
     
     Control Control(
         clk100mhz,
+        clr,
         Key_out,
         state,
         shine,
