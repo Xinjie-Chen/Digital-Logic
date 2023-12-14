@@ -22,6 +22,7 @@
 
 module Control(
     input clk,
+    input clr,
     input [4:0]key_out,
     output state_out,
     output shine_out,
@@ -30,27 +31,31 @@ module Control(
     output [3:0]who_out,
     output add_out,
     output sub_out
-    );
+);
     reg state, shine, r_mov, l_mov, add, sub;
     reg [3:0]who;
     reg [25:0]cnt_s;
-    initial begin
-        state <= 0;
-        who <= 0;
-        cnt_s <= 0;
-        shine <= 0;
-        add <= 0;
-        sub <= 0;
-    end
     
-    always@(negedge clk) begin
-        if (key_out == 16)
+    assign add_out = add;
+    assign sub_out = sub;
+    assign who_out = who;
+    assign state_out = state;
+    assign l_mov_out = l_mov;
+    assign r_mov_out = r_mov;
+    assign shine_out = shine;
+    
+    always@(posedge clk or negedge clr) begin
+        if (!clr) begin
+            state <= 0;
+        end else if (key_out == 16)
             state <= ~state;
         else state <= state;
     end
     
-    always@(negedge clk) begin
-        if (state == 1) begin
+    always@(posedge clk or negedge clr) begin
+        if (!clr) begin
+            who <= 1;
+        end else if (state == 1) begin
             if (key_out == 2) begin
                 if (who != 8)
                     who <= who + 1;
@@ -67,9 +72,10 @@ module Control(
             who <= 1;
         end
         
-        always@(posedge clk) begin
-            if (state == 1) 
-            begin
+        always@(posedge clk or negedge clr) begin
+            if (!clr) begin
+                shine <= 0;
+            end else if (state == 1) begin
                 if (cnt_s == 26'd50000000) 
                 begin
                     cnt_s <= 0;
@@ -82,8 +88,11 @@ module Control(
                 cnt_s <= 0;
         end
         
-        always@(negedge clk) begin
-        if (state == 1) begin
+        always@(posedge clk or negedge clr) begin
+            if (!clr) begin
+                r_mov <= 0;
+                l_mov <= 0;
+            end else if (state == 1) begin
             if (key_out == 1) begin
                 if (who == 1) begin
                     r_mov <= 1;
@@ -101,8 +110,11 @@ module Control(
         end
         end
        
-       always@(negedge clk) begin
-        if (state == 1) begin
+       always@(posedge clk or negedge clr) begin
+        if (!clr) begin
+            sub <= 0;
+            add <= 0;
+        end else if (state == 1) begin
             if (key_out == 4)
                 sub <= 1;
             else 
@@ -117,11 +129,4 @@ module Control(
         end    
         end
         
-       assign add_out = add;
-       assign sub_out = sub;
-       assign who_out = who;
-       assign state_out = state;
-       assign l_mov_out = l_mov;
-       assign r_mov_out = r_mov;
-       assign shine_out = shine;
 endmodule
